@@ -15,18 +15,12 @@
             margin: 0 auto;
             padding: 20px;
         }
-        .game-area {
+        .game-area, .history-area {
             background-color: white;
             border-radius: 10px;
             padding: 20px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             margin-bottom: 20px;
-        }
-        .history-area {
-            background-color: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .sequence {
             font-size: 1.2em;
@@ -34,12 +28,22 @@
             padding: 10px;
             background-color: #f8f9fa;
             border-radius: 5px;
+            word-break: break-all;
         }
-        .correct {
-            color: green;
-        }
-        .incorrect {
-            color: red;
+        @media (max-width: 576px) {
+            .container {
+                padding: 5px;
+            }
+            .game-area, .history-area {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            .sequence {
+                font-size: 1em;
+                padding: 5px;
+            }
         }
     </style>
 </head>
@@ -48,17 +52,15 @@
         <h1 class="text-center mb-4">Тренажёр гипотезы Коллатца</h1>
         
         <div class="game-area">
-            <div class="row mb-3">
-                <div class="col">
-                    <button class="btn btn-primary" onclick="startRandomGame()">Случайное число</button>
+            <form onsubmit="event.preventDefault(); startCustomGame();" class="row g-2 mb-3">
+                <div class="col-12 col-md-6 d-grid mb-2 mb-md-0">
+                    <button type="button" class="btn btn-primary w-100" onclick="startRandomGame()">Случайное число</button>
                 </div>
-                <div class="col">
-                    <div class="input-group">
-                        <input type="number" id="customNumber" class="form-control" placeholder="Ваше число">
-                        <button class="btn btn-secondary" onclick="startCustomGame()">Начать</button>
-                    </div>
+                <div class="col-12 col-md-6 d-flex">
+                    <input type="number" id="customNumber" class="form-control me-2" placeholder="Ваше число">
+                    <button type="submit" class="btn btn-secondary">Начать</button>
                 </div>
-            </div>
+            </form>
 
             <div class="instructions mb-3">
                 <h5>Правила:</h5>
@@ -74,19 +76,17 @@
                     <h4>Текущее число: <span id="currentNumber"></span></h4>
                 </div>
 
-                <div class="answer-input mb-3">
-                    <div class="input-group">
-                        <input type="number" id="answer" class="form-control" placeholder="Ваш ответ">
-                        <button class="btn btn-success" onclick="checkAnswer()">Проверить</button>
-                    </div>
-                </div>
+                <form onsubmit="event.preventDefault(); checkAnswer();" class="answer-input mb-3 d-flex">
+                    <input type="number" id="answer" class="form-control me-2" placeholder="Ваш ответ">
+                    <button type="submit" class="btn btn-success">Проверить</button>
+                </form>
 
                 <div class="sequence" id="sequence"></div>
             </div>
         </div>
 
         <div class="history-area">
-            <h3>История решений</h3>
+            <h3 class="h5">История решений</h3>
             <div id="history"></div>
         </div>
     </div>
