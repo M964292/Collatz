@@ -41,30 +41,11 @@
         .incorrect {
             color: red;
         }
-        .qr-code {
-            text-align: center;
-            margin: 20px 0;
-        }
-        .qr-code img {
-            max-width: 200px;
-            margin: 0 auto;
-        }
-        .qr-code p {
-            margin-top: 10px;
-            font-size: 0.9em;
-            color: #666;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1 class="text-center mb-4">Тренажёр гипотезы Коллатца</h1>
-        
-        <div class="qr-code">
-            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
-            <p>Отсканируйте QR-код для доступа с телефона</p>
-            <p>Или перейдите по адресу: <a href="{{ url }}" target="_blank">{{ url }}</a></p>
-        </div>
         
         <div class="game-area">
             <div class="row mb-3">
@@ -209,4 +190,4 @@
         updateHistory();
     </script>
 </body>
-</html> 
+</html>
