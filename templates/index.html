@@ -30,6 +30,15 @@
             border-radius: 5px;
             word-break: break-all;
         }
+        .btn-mir {
+            background-color: #4A90E2 !important;
+            color: #fff !important;
+            border: none !important;
+        }
+        .btn-mir:hover, .btn-mir:focus {
+            background-color: #357ab8 !important;
+            color: #fff !important;
+        }
         @media (max-width: 576px) {
             .container {
                 padding: 5px;
@@ -61,11 +70,11 @@
         <div class="game-area">
             <form onsubmit="event.preventDefault(); startCustomGame();" class="row g-2 mb-3">
                 <div class="col-12 col-md-6 d-grid mb-2 mb-md-0">
-                    <button type="button" class="btn btn-primary w-100" onclick="startRandomGame()">Случайное число</button>
+                    <button type="button" class="btn btn-mir w-100" onclick="startRandomGame()">Случайное число</button>
                 </div>
                 <div class="col-12 col-md-6 d-flex">
                     <input type="number" id="customNumber" class="form-control me-2" placeholder="Ваше число">
-                    <button type="submit" class="btn btn-secondary">Начать</button>
+                    <button type="submit" class="btn btn-mir">Начать</button>
                 </div>
             </form>
 
@@ -85,22 +94,24 @@
 
                 <form onsubmit="event.preventDefault(); checkAnswer();" class="answer-input mb-3 d-flex">
                     <input type="number" id="answer" class="form-control me-2" placeholder="Ваш ответ">
-                    <button type="submit" class="btn btn-success">Проверить</button>
+                    <button type="submit" class="btn btn-mir">Проверить</button>
                 </form>
 
                 <div class="sequence" id="sequence"></div>
                 <div class="mt-2 text-end">
-                    <button class="btn btn-outline-secondary btn-sm" onclick="showCorrectSequence()">Проверка</button>
+                    <button class="btn btn-mir btn-sm" onclick="showCorrectSequence()">Проверка</button>
                 </div>
                 <div id="correctSequence" class="alert alert-secondary mt-2 d-none"></div>
             </div>
+            <div id="errorBlock" class="alert alert-danger mt-2 d-none"></div>
+            <div id="errorCounter" class="text-end text-danger fw-bold mb-2"></div>
         </div>
 
         <div class="history-area">
             <h3 class="h5">История решений</h3>
             <div id="history"></div>
             <div class="mt-2 text-end">
-                <button class="btn btn-danger btn-sm" onclick="showResetHistory()">Сбросить историю</button>
+                <button class="btn btn-mir btn-sm" onclick="showResetHistory()">Сбросить историю</button>
             </div>
         </div>
     </div>
@@ -110,6 +121,7 @@
         let sequence = [];
         let timerInterval = null;
         let startTime = null;
+        let errorCount = 0;
 
         function startTimer() {
             startTime = Date.now();
@@ -136,6 +148,9 @@
                 .then(data => {
                     currentNumber = data.number;
                     sequence = data.sequence;
+                    errorCount = 0;
+                    updateErrorCounter();
+                    showError('', true);
                     updateDisplay();
                     startTimer();
                 });
@@ -144,7 +159,7 @@
         function startCustomGame() {
             const number = document.getElementById('customNumber').value;
             if (!number) {
-                alert('Введите число');
+                showError('Введите число');
                 return;
             }
             fetch('/start_custom', {
@@ -155,11 +170,14 @@
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
-                    alert(data.error);
+                    showError(data.error);
                     return;
                 }
                 currentNumber = data.number;
                 sequence = data.sequence;
+                errorCount = 0;
+                updateErrorCounter();
+                showError('', true);
                 updateDisplay();
                 startTimer();
             });
@@ -168,7 +186,7 @@
         function checkAnswer() {
             const answer = document.getElementById('answer').value;
             if (!answer) {
-                alert('Введите ответ');
+                showError('Введите ответ');
                 return;
             }
 
@@ -182,18 +200,44 @@
                 if (data.correct) {
                     if (data.game_over) {
                         stopTimer();
+                        showError('', true);
+                        errorCount = 0;
+                        updateErrorCounter();
                         alert(`Поздравляем! Вы решили задачу за ${data.time.toFixed(2)} секунд`);
                         updateHistory();
                     } else {
                         currentNumber = data.next_number;
                         sequence = data.sequence;
+                        showError('', true);
                         updateDisplay();
                     }
                 } else {
-                    alert(`Неверно! Правильный ответ: ${data.expected}`);
+                    errorCount++;
+                    showError(`Неверно! Правильный ответ: ${data.expected}`);
+                    updateErrorCounter();
                 }
                 document.getElementById('answer').value = '';
             });
+        }
+
+        function showError(message, hide=false) {
+            const errorBlock = document.getElementById('errorBlock');
+            if (hide || !message) {
+                errorBlock.classList.add('d-none');
+                errorBlock.textContent = '';
+            } else {
+                errorBlock.classList.remove('d-none');
+                errorBlock.textContent = message;
+            }
+        }
+
+        function updateErrorCounter() {
+            const errorCounter = document.getElementById('errorCounter');
+            if (errorCount > 0) {
+                errorCounter.textContent = `Ошибок: ${errorCount}`;
+            } else {
+                errorCounter.textContent = '';
+            }
         }
 
         function updateDisplay() {
@@ -241,7 +285,7 @@
 
         function showCorrectSequence() {
             if (!currentNumber) {
-                alert('Сначала выберите число!');
+                showError('Сначала выберите число!');
                 return;
             }
             fetch('/get_sequence', {
